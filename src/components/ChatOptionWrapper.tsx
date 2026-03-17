@@ -1,16 +1,11 @@
-import { useContext } from "react"
-
-import TaskContext from "../store/TaskContext"
-
 type optionProps = {
-    chatOption: string
+    chatOption: string,
+    onSelect: () => void
 }
 
 export default function ChatOptionWrapper( props : optionProps ) {
-    const taskCtx = useContext(TaskContext);
-
     const handleOptionClick = () => {
-        taskCtx?.updateChatProgress()
+        props.onSelect();
     }
 
     return (

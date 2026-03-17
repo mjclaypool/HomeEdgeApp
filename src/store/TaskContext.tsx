@@ -1,7 +1,7 @@
-import { createContext, useCallback, useState} from "react";
+import { createContext, useState} from "react";
 import type { PropsWithChildren } from "react";
 
-import chatDiag from "../data/chatDialog.json";
+import chatNodes from "../data/chatNodes.json";
 import taskList from "../data/taskDetails.json";
 
 interface TaskData {
@@ -16,24 +16,29 @@ interface TaskData {
   references: string[]
 }
 
-interface ChatData {
-    id: number,
-    type: string,
-    text: string[]
+interface ChatNode {
+    resp_type: string,
+    next_node: string[]
+    chat_text: string,
+    options?: {
+        0?: string,
+        1?: string,
+        2?: string,
+        3?: string,
+        4?: string
+    } | null
 }
 
 interface TaskContextType {
     task: TaskData,
     taskList: TaskData[],
-    chatProgress: ChatData[],
-    chatNext: ChatData,
+    currentChatNode: ChatNode,
+    chatDialog: string[],
     modalState: boolean,
     updateModalState: () => void,
-    showTaskDetails: (task: string) => void;
-    updateChatProgress: () => void;
-    updateChatInputs: (choice: number) => void;
-    updateReminder: () => void;
-    updateReminderEarly: () => void;
+    showTaskDetails: (task: string) => void,
+    updateChatProgression: (res: string) => void,
+    updateChatNode: (node: string) => void,
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined)
@@ -50,15 +55,11 @@ const defaultTask: TaskData = {
     references: [""]
 }
 
-const defaultChat: ChatData[] = [chatDiag[0]]
-const resetChat: ChatData[] = [chatDiag[0], chatDiag[1]]
-const defaultNext: ChatData = chatDiag[1]
 
 export function TaskContextProvider({children} : PropsWithChildren) {
+    const [currentChatNode, setCurrentChatNode] = useState<ChatNode>(chatNodes[1])
     const [currentTask, setCurrentTask] = useState<TaskData>(defaultTask);
-    const [chatProgress, setChatProgress] = useState<ChatData[]>(defaultChat);
-    const [chatNext, setChatNext] = useState<ChatData>(defaultNext)
-    const [chatInputs, setChatInputs] = useState<string[]>([]);
+    const [chatProgression, setChatProgression] = useState([chatNodes[1].chat_text])
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const showTaskDetails = (taskURL: string) => {
@@ -68,10 +69,6 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
-    const updateReminder = () => {}
-
-    const updateReminderEarly = () => {}
-
     const updateModalState = () => {
         if (modalIsOpen) {
             setModalIsOpen(false)
@@ -80,40 +77,25 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
-    const updateChatProgress = useCallback(() => {
-        setChatProgress(prev => {
-            const lastChat = prev[prev.length - 1];
-            const chatPos = lastChat ? lastChat.id + 1 : 0;
+    const updateChatProgression = ( res : string ) => {
+        setChatProgression(prev => [...prev, res])
+    }
 
-            const currentChat = chatDiag[chatPos] ?? resetChat[0];
-            const nextChat = chatDiag[chatPos + 1] ?? resetChat[1]; //bug when it resets, initial option is off by 1
-            setChatNext(nextChat);
-
-            if (chatPos > chatDiag.length - 1) {
-                return defaultChat;
-            }
-            return [...prev, currentChat];
-        });
-    }, []);
-
-    const updateChatInputs = ( choice : number ) => {
-        const lastChat = chatProgress[chatProgress.length - 1];
-        const chatPos = lastChat ? lastChat.id + 1 : 0;
-        setChatInputs([...chatInputs, chatDiag[chatPos].text[choice]])
+    const updateChatNode = ( node : string ) => {
+        setChatProgression(prev => [...prev, chatNodes[node as keyof typeof chatNodes].chat_text])
+        setCurrentChatNode(chatNodes[node as keyof typeof chatNodes])
     }
 
     const taskContext = {
         task: currentTask,
         taskList: taskList,
-        chatProgress: chatProgress,
-        chatNext: chatNext,
+        currentChatNode: currentChatNode,
+        chatDialog: chatProgression,
         modalState: modalIsOpen,
         updateModalState,
         showTaskDetails,
-        updateChatProgress,
-        updateChatInputs,
-        updateReminder,
-        updateReminderEarly
+        updateChatProgression,
+        updateChatNode,
     }
 
   return <TaskContext.Provider value={taskContext}>{children}</TaskContext.Provider>

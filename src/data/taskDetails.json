@@ -20,5 +20,49 @@
             "https://www.referencelink1.com/homemaintenance",
             "https://www.referencelink2.com/routinetasks"
         ]
+    },
+    {
+        "id": "replace-air-filters2",
+        "name": "Replace Air Filters",
+        "description": "Inspect and replace the HVAC air filter to maintain good airflow and indoor air quality.",
+        "frequency": "3m",
+        "reminder": "yes",
+        "reminderEarly": "no",
+        "notes": [
+            "Size: 20”x14”x1”, Qty: 2"
+        ],
+        "instructions": [
+            "Turn off the HVAC system.",
+            "Remove the filter from the return vent or furnace compartment.",
+            "Check for dust buildup.",
+            "If dirty, replace it with a filter of the same size and rating.",
+            "Turn the system back on."
+        ],
+        "references": [
+            "https://www.referencelink1.com/homemaintenance",
+            "https://www.referencelink2.com/routinetasks"
+        ]
+    },
+    {
+        "id": "replace-air-filters3",
+        "name": "Replace Air Filters",
+        "description": "Inspect and replace the HVAC air filter to maintain good airflow and indoor air quality.",
+        "frequency": "3m",
+        "reminder": "yes",
+        "reminderEarly": "no",
+        "notes": [
+            "Size: 20”x14”x1”, Qty: 2"
+        ],
+        "instructions": [
+            "Turn off the HVAC system.",
+            "Remove the filter from the return vent or furnace compartment.",
+            "Check for dust buildup.",
+            "If dirty, replace it with a filter of the same size and rating.",
+            "Turn the system back on."
+        ],
+        "references": [
+            "https://www.referencelink1.com/homemaintenance",
+            "https://www.referencelink2.com/routinetasks"
+        ]
     }
 ]

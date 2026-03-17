@@ -1,13 +1,12 @@
-import { useContext } from "react"
 import { IoSend } from "react-icons/io5";
 
-import TaskContext from "../store/TaskContext";
+type buttonProps = {
+    onSelect: () => void
+}
 
-export default function SendButton() {
-    const taskCtx = useContext(TaskContext);
-
+export default function SendButton( props : buttonProps ) {
     const handleSendClick = () => {
-        taskCtx?.updateChatProgress()
+        props.onSelect()
     }
 
     return (

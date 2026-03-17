@@ -12,14 +12,32 @@ export default function ChatInputArea() {
         setInputText(event.target.value)
     }
 
+    const handleSelect = (index: number) => {
+        const options = taskCtx?.currentChatNode.options;
+        if (options) {
+            const optionsArray = Object.values(options);
+            taskCtx?.updateChatProgression(optionsArray[index])
+            setTimeout(() => {
+                taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[index])
+            }, 1000);
+        }
+    }
+
+    const handleUserInput = () => {
+        taskCtx?.updateChatProgression(inputText)
+        setTimeout(() => {
+            taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[0])
+        }, 1000);
+    }
+
     return (
         <div className="flex justify-between gap-[8px] w-full bg-cc-sec rounded-lg p-2">
-            {taskCtx?.chatProgress && taskCtx.chatProgress.length > 0 && taskCtx.chatNext.type == "a" && taskCtx.chatNext.text.length > 1
+            {taskCtx?.currentChatNode.resp_type == "multi"
             ?
             <div className="flex flex-col gap-[8px] w-full">
-                {taskCtx.chatNext.text.map(option => (
-                    <div key={option}>
-                        <ChatOptionWrapper chatOption={option}/>
+                {Object.values(taskCtx.currentChatNode.options || {}).map((option, index) => (
+                    <div key={index}>
+                        <ChatOptionWrapper chatOption={option} onSelect={() => handleSelect(index)}/>
                     </div>
                 ))}
             </div>
@@ -32,7 +50,7 @@ export default function ChatInputArea() {
                     onChange={handleInputChange}
                     placeholder="Enter text"
                 />
-                <SendButton />
+                <SendButton onSelect={() => handleUserInput()} />
             </div>
             }
         </div>

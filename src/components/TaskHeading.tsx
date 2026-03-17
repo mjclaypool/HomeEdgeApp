@@ -1,13 +1,17 @@
-// Use context to get task name, description
+import { useContext } from "react";
+
+import TaskContext from "../store/TaskContext";
 
 import BackButton from "../UI/BackButton";
 
 export default function TaskHeading() {
+    const taskCtx = useContext(TaskContext);
+
     return (
         <div>
             <BackButton />
-            <h1 className="text-[24px]">Replace Air Filters</h1>
-            <p className="text-[12px]">Inspect and replace the HVAC air filter to maintain good airflow and indoor air wuality.</p>
+            <h1 className="text-[24px]">{taskCtx?.task.name}</h1>
+            <p className="text-[12px]">{taskCtx?.task.description}</p>
         </div>
     )
 }

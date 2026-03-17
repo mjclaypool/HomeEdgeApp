@@ -10,9 +10,9 @@ export default function ChatDialog() {
 
     return (
         <div className="w-full flex flex-col gap-[18px]">
-            {taskCtx?.chatProgress.map(diag => (
-                <div key={diag.id + diag.type} className="flex flex-col">
-                    {diag.type == "q" ? <ChatOutputWrapper chatOutput={diag.text[0]} /> : <ChatInputWrapper userInput={diag.text[0]} />}
+            {taskCtx?.chatDialog.map((msg, index) => (
+                <div key={index} className="flex flex-col">
+                    {index % 2 == 0 ? <ChatOutputWrapper chatOutput={msg} /> : <ChatInputWrapper userInput={msg} />}
                 </div>
             ))}
         </div>

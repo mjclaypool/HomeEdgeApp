@@ -6,7 +6,7 @@ export default function TaskCards() {
     const taskCtx = useContext(TaskContext);
 
     return (
-        <div className="py-[12px]">
+        <div className="flex flex-wrap justify-between gap-6 py-[12px]">
             {taskCtx?.taskList.map(card => (
                 <div key={card.id} className="w-[165px] h-[85px] bg-cc-offw rounded-lg text-cc-prim font-medium">
                     <Link to={card.id} className="flex flex-col justify-between w-full h-full p-[6px]">
