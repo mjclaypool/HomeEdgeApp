@@ -1,8 +1,15 @@
-// Add removing task from JSON
+import { useNavigate } from "react-router-dom";
 
-export default function DeleteButton() {
+type deleteProps = {
+    onClick: () => void
+}
+
+export default function DeleteButton( props : deleteProps ) {
+    const navigate = useNavigate();
+
     const handleClick = () => {
-        
+        props.onClick()
+        navigate('/dashboard')
     }
 
     return (

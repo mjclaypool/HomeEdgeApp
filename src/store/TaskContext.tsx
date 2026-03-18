@@ -1,16 +1,16 @@
-import { createContext, useState} from "react";
+import { createContext, useEffect, useState } from "react";
 import type { PropsWithChildren } from "react";
 
 import chatNodes from "../data/chatNodes.json";
-import taskList from "../data/taskDetails.json";
+import taskList from "../../../HomeEdgeBackend/data/taskDetails.json";
 
 interface TaskData {
   id: string,
   name: string,
   description: string,
   frequency: string,
-  reminder: string,
-  reminderEarly: string,
+  reminder: boolean,
+  reminderEarly: boolean,
   notes: string[],
   instructions: string[],
   references: string[]
@@ -37,6 +37,10 @@ interface TaskContextType {
     modalState: boolean,
     updateModalState: () => void,
     showTaskDetails: (task: string) => void,
+    deleteTaskDetails: (task: string) => void,
+    updateTaskFrequency: (task: string, freq: string) => void,
+    updateTaskReminder: (task: string) => void,
+    updateTaskReminderEarly: (task: string) => void,
     updateChatProgression: (res: string) => void,
     updateChatNode: (node: string) => void,
 }
@@ -48,8 +52,8 @@ const defaultTask: TaskData = {
     name: "",
     description: "",
     frequency: "",
-    reminder: "",
-    reminderEarly: "",
+    reminder: true,
+    reminderEarly: true,
     notes: [""],
     instructions: [""],
     references: [""]
@@ -59,13 +63,97 @@ const defaultTask: TaskData = {
 export function TaskContextProvider({children} : PropsWithChildren) {
     const [currentChatNode, setCurrentChatNode] = useState<ChatNode>(chatNodes[1])
     const [currentTask, setCurrentTask] = useState<TaskData>(defaultTask);
+    const [currentTaskList, setCurrentTaskList] = useState<TaskData[]>(taskList)
     const [chatProgression, setChatProgression] = useState([chatNodes[1].chat_text])
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
+    useEffect(() => {
+        const options = {method: 'GET'}
+        fetch('http://127.0.0.1:5000/task_list', options)
+        .then(response => response.json())
+        .then(data => {
+            setCurrentTaskList(data)
+        })
+        .catch(e => {
+            console.error(e)
+        })
+    }, [])
+
     const showTaskDetails = (taskURL: string) => {
-        const selectedTask = taskList.filter((task) => task.id == taskURL);
+        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
             setCurrentTask(selectedTask[0]);
+        }
+    }
+
+    const deleteTaskDetails = (taskURL: string) => {
+        const options = {method: 'DELETE'}
+        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
+            fetch(`http://127.0.0.1:5000/delete_task?task_id=${selectedTask[0].id}`, options)
+            .then(response => response.json())
+            .then(data => {
+                setCurrentTaskList(data)
+            })
+            .catch(e => {
+                console.error(e)
+            })
+        }
+    }
+
+    const updateTaskFrequency = (taskURL: string, newFrequencyValue: string) => {
+        const options = {method: 'POST'}
+        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
+            fetch(`http://127.0.0.1:5000/update_task_freq?task_id=${selectedTask[0].id}&task_freq=${newFrequencyValue}`, options)
+            .then(response => response.json())
+            .then(data => {
+                setCurrentTaskList(data)
+                if (currentTask.id === selectedTask[0].id) {
+                    setCurrentTask({...currentTask, frequency: newFrequencyValue})
+                }
+            })
+            .catch(e => {
+                console.error(e)
+            })
+        }
+    }
+
+    const updateTaskReminder = (taskURL: string) => {
+        const options = {method: 'POST'}
+        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
+            const newReminderValue = !selectedTask[0].reminder;
+            fetch(`http://127.0.0.1:5000/update_task_reminder?task_id=${selectedTask[0].id}&task_reminder=${newReminderValue}`, options)
+            .then(response => response.json())
+            .then(data => {
+                setCurrentTaskList(data)
+                if (currentTask.id === selectedTask[0].id) {
+                    setCurrentTask({...currentTask, reminder: newReminderValue})
+                }
+            })
+            .catch(e => {
+                console.error(e)
+            })
+        }
+    }
+
+    const updateTaskReminderEarly = (taskURL: string) => {
+        const options = {method: 'POST'}
+        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
+            const newReminderEarlyValue = !selectedTask[0].reminderEarly;
+            fetch(`http://127.0.0.1:5000/update_task_reminder_early?task_id=${selectedTask[0].id}&task_reminder_early=${newReminderEarlyValue}`, options)
+            .then(response => response.json())
+            .then(data => {
+                setCurrentTaskList(data)
+                if (currentTask.id === selectedTask[0].id) {
+                    setCurrentTask({...currentTask, reminderEarly: newReminderEarlyValue})
+                }
+            })
+            .catch(e => {
+                console.error(e)
+            })
         }
     }
 
@@ -88,12 +176,16 @@ export function TaskContextProvider({children} : PropsWithChildren) {
 
     const taskContext = {
         task: currentTask,
-        taskList: taskList,
+        taskList: currentTaskList,
         currentChatNode: currentChatNode,
         chatDialog: chatProgression,
         modalState: modalIsOpen,
         updateModalState,
         showTaskDetails,
+        deleteTaskDetails,
+        updateTaskFrequency,
+        updateTaskReminder,
+        updateTaskReminderEarly,
         updateChatProgression,
         updateChatNode,
     }

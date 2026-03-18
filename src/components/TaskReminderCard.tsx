@@ -1,10 +1,10 @@
-import ToggleButton from "../UI/ToggleButton"
+// import ToggleButton from "../UI/ToggleButton"
 
 type reminderProps = {
     title: string,
     freq: string,
     next: string,
-    on: string
+    children?: React.ReactNode
 }
 
 export default function TaskReminderCard( props : reminderProps ) {
@@ -15,8 +15,7 @@ export default function TaskReminderCard( props : reminderProps ) {
                 <h4 className="text-[12px]">{props.freq}</h4>
                 <h4 className="text-[12px]">{props.next}</h4>
             </div>
-            {props.on == "yes" && <ToggleButton active={true} />}
-            {props.on == "no" &&  <ToggleButton active={false} />}
+            {props.children}
         </div>
     )
 }

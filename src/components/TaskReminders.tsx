@@ -1,14 +1,27 @@
 import { useContext } from "react"
+import { useParams } from "react-router-dom"
 
 import TaskReminderCard from "./TaskReminderCard"
 import TaskSubHeading from "./TaskSubHeading"
 import TaskContext from "../store/TaskContext"
+import ToggleButton from "../UI/ToggleButton"
 
-// Add next date to JSON and task context type
-// Add toggle button
 
 export default function TaskReminders() {
+    const params = useParams();
     const taskCtx = useContext(TaskContext);
+
+    const handleToggle = (reminderType : string) => {
+        if (reminderType == "reminder") {
+            if (params.task) {
+                taskCtx?.updateTaskReminder(params.task)
+            }
+        } else if (reminderType == "early") {
+            if (params.task) {
+                taskCtx?.updateTaskReminderEarly(params.task)
+            }
+        }
+    }
 
     return (
         <div className="flex flex-col gap-[6px]">
@@ -17,14 +30,16 @@ export default function TaskReminders() {
                 title={`${taskCtx?.task.name} - Early Reminder `}
                 freq={`Every ${taskCtx?.task.frequency}`}
                 next={`Next Reminder: `}
-                on={`${taskCtx?.task.reminderEarly}`}
-            />
+            >
+                <ToggleButton active={taskCtx?.task.reminderEarly} onToggle={() => handleToggle("early")} />
+            </TaskReminderCard>
             <TaskReminderCard
                 title={`${taskCtx?.task.name}`}
                 freq={`Every ${taskCtx?.task.frequency}`}
                 next={`Next Reminder: `}
-                on={`${taskCtx?.task.reminder}`}
-            />
+            >
+                <ToggleButton active={taskCtx?.task.reminder} onToggle={() => handleToggle("reminder")}/>
+            </TaskReminderCard>
         </div>
     )
 }
