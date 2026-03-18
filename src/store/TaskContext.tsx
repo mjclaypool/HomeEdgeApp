@@ -41,6 +41,7 @@ interface TaskContextType {
     updateTaskFrequency: (task: string, freq: string) => void,
     updateTaskReminder: (task: string) => void,
     updateTaskReminderEarly: (task: string) => void,
+    updateTaskNotes: (task: string, note: string, noteIndex: number) => void,
     updateChatProgression: (res: string) => void,
     updateChatNode: (node: string) => void,
 }
@@ -157,6 +158,27 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
+    const updateTaskNotes = (taskURL: string, note: string, noteIndex: number) => {
+        const options = {method: 'POST'}
+        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
+            fetch(`http://127.0.0.1:5000/update_task_notes?task_id=${selectedTask[0].id}&task_note=${note}&task_note_index=${noteIndex}`, options)
+            .then(response => response.json())
+            .then(data => {
+                setCurrentTaskList(data)
+                if (currentTask.id === selectedTask[0].id) {
+                    // Create a new notes array with the updated note at noteIndex
+                    const updatedNotes = [...currentTask.notes];
+                    updatedNotes[noteIndex] = note;
+                    setCurrentTask({...currentTask, notes: updatedNotes})
+                }
+            })
+            .catch(e => {
+                console.error(e)
+            })
+        }
+    }
+
     const updateModalState = () => {
         if (modalIsOpen) {
             setModalIsOpen(false)
@@ -186,6 +208,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         updateTaskFrequency,
         updateTaskReminder,
         updateTaskReminderEarly,
+        updateTaskNotes,
         updateChatProgression,
         updateChatNode,
     }
