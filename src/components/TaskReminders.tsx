@@ -29,14 +29,14 @@ export default function TaskReminders() {
             <TaskReminderCard
                 title={`${taskCtx?.task.name} - Early Reminder `}
                 freq={`Every ${taskCtx?.task.frequency}`}
-                next={`Next Reminder: `}
+                next={`Next Early Reminder: ${taskCtx?.task.nextReminderEarly}`}
             >
                 <ToggleButton active={taskCtx?.task.reminderEarly} onToggle={() => handleToggle("early")} />
             </TaskReminderCard>
             <TaskReminderCard
                 title={`${taskCtx?.task.name}`}
                 freq={`Every ${taskCtx?.task.frequency}`}
-                next={`Next Reminder: `}
+                next={`Next Reminder: ${taskCtx?.task.nextReminder}`}
             >
                 <ToggleButton active={taskCtx?.task.reminder} onToggle={() => handleToggle("reminder")}/>
             </TaskReminderCard>

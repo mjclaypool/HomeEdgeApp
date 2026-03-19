@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import { add } from 'date-fns';
 import type { PropsWithChildren } from "react";
 
 import chatNodes from "../data/chatNodes.json";
@@ -11,6 +12,8 @@ interface TaskData {
   frequency: string,
   reminder: boolean,
   reminderEarly: boolean,
+  nextReminder: string,
+  nextReminderEarly: string,
   notes: string[],
   instructions: string[],
   references: string[]
@@ -32,6 +35,7 @@ interface ChatNode {
 interface TaskContextType {
     task: TaskData,
     taskList: TaskData[],
+    upcomingTaskList: TaskData[],
     currentChatNode: ChatNode,
     chatDialog: string[],
     modalState: boolean,
@@ -55,6 +59,8 @@ const defaultTask: TaskData = {
     frequency: "",
     reminder: true,
     reminderEarly: true,
+    nextReminder: "",
+    nextReminderEarly: "",
     notes: [""],
     instructions: [""],
     references: [""]
@@ -65,15 +71,27 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const [currentChatNode, setCurrentChatNode] = useState<ChatNode>(chatNodes[1])
     const [currentTask, setCurrentTask] = useState<TaskData>(defaultTask);
     const [currentTaskList, setCurrentTaskList] = useState<TaskData[]>(taskList)
+    const [upcomingTaskList, setUpcomingTaskList] = useState<TaskData[]>(taskList)
     const [chatProgression, setChatProgression] = useState([chatNodes[1].chat_text])
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     useEffect(() => {
+        const today = new Date();
+        const upcomingDate = add(today, { days: 30 })
         const options = {method: 'GET'}
         fetch('http://127.0.0.1:5000/task_list', options)
         .then(response => response.json())
         .then(data => {
             setCurrentTaskList(data)
+            const upcomingTasks: TaskData[] = [];
+            for (let i = 0; i < data.length; i++) {
+                const [month, day, year] = data[i].nextReminder.split('/')
+                const dateObj = new Date(+year, +month - 1, +day);
+                if (dateObj < upcomingDate) {
+                    upcomingTasks.push(data[i])
+                }
+            }
+            setUpcomingTaskList(upcomingTasks)
         })
         .catch(e => {
             console.error(e)
@@ -199,6 +217,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const taskContext = {
         task: currentTask,
         taskList: currentTaskList,
+        upcomingTaskList: upcomingTaskList,
         currentChatNode: currentChatNode,
         chatDialog: chatProgression,
         modalState: modalIsOpen,

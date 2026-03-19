@@ -12,7 +12,7 @@ export default function DashboardAllTasks() {
         <div>
             <DashboardHeading headingText="All Tasks" />
             {taskCtx?.taskList.length == 0 && <NoTasksMessage noTaskMsg="No task currently being tracked." />}
-            <TaskCards />
+            <TaskCards cardList={taskCtx?.taskList} />
         </div>
     )
 }
