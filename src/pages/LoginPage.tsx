@@ -20,6 +20,12 @@ export default function LoginPage() {
         setPasswordError(false)
     }
 
+    const handleEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter") {
+            handleClick()
+        }
+    }
+
     const handleClick = () => {
         if (username == defaultUsername && password == defaultPassword) {
             navigate('/dashboard')
@@ -44,6 +50,7 @@ export default function LoginPage() {
                     id="username-input"
                     value={username}
                     onChange={handleUsernameChange}
+                    onKeyDown={handleEnter}
                     placeholder="Enter your username"
                 />
                 {usernameError && <p className="text-[12px] text-cc-red font-medium">Incorrect username</p>}
@@ -53,6 +60,7 @@ export default function LoginPage() {
                     id="password-input"
                     value={password}
                     onChange={handlePasswordChange}
+                    onKeyDown={handleEnter}
                     placeholder="Enter your password"
                 />
                 {passwordError && <p className="text-[12px] text-cc-red font-medium">Incorrect password</p>}
