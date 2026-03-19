@@ -1,6 +1,4 @@
-// import { useContext } from "react"
 import { Link } from "react-router-dom"
-// import TaskContext from "../store/TaskContext";
 
 interface TaskData {
   id: string,
@@ -21,11 +19,8 @@ type cardProps = {
 }
 
 export default function TaskCards( props : cardProps ) {
-    // const taskCtx = useContext(TaskContext);
-
     return (
         <div className="flex flex-wrap justify-between gap-6 py-[12px]">
-            {/* {taskCtx?.taskList.map(card => ( */}
             {props.cardList && props.cardList.map(card => (
                 <div key={card.id} className="w-[165px] h-[85px] bg-cc-offw rounded-lg text-cc-prim font-medium">
                     <Link to={card.id} className="flex flex-col justify-between w-full h-full p-[6px]">
