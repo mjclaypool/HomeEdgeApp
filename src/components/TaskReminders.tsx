@@ -1,5 +1,4 @@
 import { useContext } from "react"
-import { useParams } from "react-router-dom"
 
 import TaskReminderCard from "./TaskReminderCard"
 import TaskSubHeading from "./TaskSubHeading"
@@ -8,18 +7,13 @@ import ToggleButton from "../UI/ToggleButton"
 
 
 export default function TaskReminders() {
-    const params = useParams();
     const taskCtx = useContext(TaskContext);
 
     const handleToggle = (reminderType : string) => {
         if (reminderType == "reminder") {
-            if (params.task) {
-                taskCtx?.updateTaskReminder(params.task)
-            }
+            taskCtx?.updateTaskReminder()
         } else if (reminderType == "early") {
-            if (params.task) {
-                taskCtx?.updateTaskReminderEarly(params.task)
-            }
+            taskCtx?.updateTaskReminderEarly()
         }
     }
 

@@ -14,9 +14,13 @@ export default function ChatInputArea() {
 
     const handleSelect = (index: number) => {
         const options = taskCtx?.currentChatNode.options;
+        const nodeId = taskCtx?.currentChatNode.id;
         if (options) {
             const optionsArray = Object.values(options);
             taskCtx?.updateChatProgression(optionsArray[index])
+            if (nodeId) {
+                taskCtx?.checkForOverwrite(nodeId, index)
+            }
             setTimeout(() => {
                 taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[index])
             }, 1000);
@@ -24,10 +28,18 @@ export default function ChatInputArea() {
     }
 
     const handleUserInput = () => {
-        taskCtx?.updateChatProgression(inputText)
-        setTimeout(() => {
-            taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[0])
-        }, 1000);
+        if (taskCtx?.isListening) {
+            taskCtx?.getTaskDetails(inputText)
+        } else {
+            const nodeId = taskCtx?.currentChatNode.id;
+            taskCtx?.updateChatProgression(inputText)
+            if (nodeId) {
+                taskCtx?.checkForOverwrite(nodeId, undefined, inputText)
+            }
+            setTimeout(() => {
+                taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[0])
+            }, 1000);
+        }
     }
 
     return (

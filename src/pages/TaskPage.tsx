@@ -28,7 +28,7 @@ export default function TaskPage() {
     }
 
     return (
-        <div className="flex flex-col gap-[28px] text-cc-offw font-medium">
+        <div className="flex flex-col gap-[28px] text-cc-offw font-medium pb-[24px]">
             <Header />
             <TaskHeading />
             <TaskReminders />

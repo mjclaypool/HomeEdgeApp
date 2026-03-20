@@ -17,14 +17,14 @@ export default function EditNoteWindow( props : editProps ) {
     }
 
     const handleBlur = () => {
-        taskCtx?.updateTaskNotes(taskCtx.task.id, inputValue, props.index)
+        taskCtx?.updateTaskNotes(inputValue, props.index)
         props.onDone()
     }
 
     return (
         <div>
             <input
-                className="bg-transparent border-2 border-cc-offw rounded-lg p-1"
+                className="bg-cc-offw text-cc-prim rounded-lg p-1"
                 type="text"
                 id={props.index.toString()}
                 value={inputValue}

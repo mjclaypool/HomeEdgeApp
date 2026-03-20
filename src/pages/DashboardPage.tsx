@@ -11,7 +11,7 @@ export default function DashboardPage() {
     const taskCtx = useContext(TaskContext);
 
     return (
-        <div className="flex flex-col gap-[32px]">
+        <div className="flex flex-col gap-[32px] pb-[24px]">
             <Header />
             <DashboardUpcomingTasks />
             <DashboardAllTasks />

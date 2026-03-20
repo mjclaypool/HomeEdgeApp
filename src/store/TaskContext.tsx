@@ -2,7 +2,8 @@ import { createContext, useEffect, useState } from "react";
 import { add } from 'date-fns';
 import type { PropsWithChildren } from "react";
 
-import chatNodes from "../data/chatNodes.json";
+// import chatNodes from "../data/chatNodes.json";
+import chatNodes from "../../../HomeEdgeBackend/data/chatNodes.json";
 import taskList from "../../../HomeEdgeBackend/data/taskDetails.json";
 
 interface TaskData {
@@ -20,6 +21,7 @@ interface TaskData {
 }
 
 interface ChatNode {
+    id: number,
     resp_type: string,
     next_node: string[]
     chat_text: string,
@@ -38,16 +40,19 @@ interface TaskContextType {
     upcomingTaskList: TaskData[],
     currentChatNode: ChatNode,
     chatDialog: string[],
+    isListening: boolean,
     modalState: boolean,
     updateModalState: () => void,
     showTaskDetails: (task: string) => void,
     deleteTaskDetails: (task: string) => void,
-    updateTaskFrequency: (task: string, freq: string) => void,
-    updateTaskReminder: (task: string) => void,
-    updateTaskReminderEarly: (task: string) => void,
-    updateTaskNotes: (task: string, note: string, noteIndex: number) => void,
+    updateTaskFrequency: (freq: string) => void,
+    updateTaskReminder: () => void,
+    updateTaskReminderEarly: () => void,
+    updateTaskNotes: (note: string, noteIndex: number) => void,
     updateChatProgression: (res: string) => void,
     updateChatNode: (node: string) => void,
+    getTaskDetails: (task: string) => void,
+    checkForOverwrite: (nodeId: number, optionIndex?: number, userInput?: string) => void
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined)
@@ -74,6 +79,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const [upcomingTaskList, setUpcomingTaskList] = useState<TaskData[]>(taskList)
     const [chatProgression, setChatProgression] = useState([chatNodes[1].chat_text])
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const isListening = currentChatNode.next_node[0] === "4"
 
     useEffect(() => {
         const today = new Date();
@@ -98,6 +104,12 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         })
     }, [])
 
+    useEffect(() => {
+        if (isListening) {
+            console.log("Listening")
+        }
+    }, [isListening])
+
     const showTaskDetails = (taskURL: string) => {
         const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
@@ -120,9 +132,11 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
-    const updateTaskFrequency = (taskURL: string, newFrequencyValue: string) => {
+    // const updateTaskFrequency = (taskURL: string, newFrequencyValue: string) => {
+    const updateTaskFrequency = (newFrequencyValue: string) => {
         const options = {method: 'POST'}
-        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        const selectedTask = [currentTask];
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
             fetch(`http://127.0.0.1:5000/update_task_freq?task_id=${selectedTask[0].id}&task_freq=${newFrequencyValue}`, options)
             .then(response => response.json())
@@ -138,9 +152,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
-    const updateTaskReminder = (taskURL: string) => {
+    const updateTaskReminder = () => {
         const options = {method: 'POST'}
-        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        const selectedTask = [currentTask];
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
             const newReminderValue = !selectedTask[0].reminder;
             fetch(`http://127.0.0.1:5000/update_task_reminder?task_id=${selectedTask[0].id}&task_reminder=${newReminderValue}`, options)
@@ -157,9 +172,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
-    const updateTaskReminderEarly = (taskURL: string) => {
+    const updateTaskReminderEarly = () => {
         const options = {method: 'POST'}
-        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        const selectedTask = [currentTask];
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
             const newReminderEarlyValue = !selectedTask[0].reminderEarly;
             fetch(`http://127.0.0.1:5000/update_task_reminder_early?task_id=${selectedTask[0].id}&task_reminder_early=${newReminderEarlyValue}`, options)
@@ -176,18 +192,20 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
-    const updateTaskNotes = (taskURL: string, note: string, noteIndex: number) => {
+    const updateTaskNotes = (note: string, noteIndex?: number) => {
         const options = {method: 'POST'}
-        const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
+        const selectedTask = [currentTask];
+        const index = noteIndex ?? 0
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
-            fetch(`http://127.0.0.1:5000/update_task_notes?task_id=${selectedTask[0].id}&task_note=${note}&task_note_index=${noteIndex}`, options)
+            fetch(`http://127.0.0.1:5000/update_task_notes?task_id=${selectedTask[0].id}&task_note=${note}&task_note_index=${index}`, options)
             .then(response => response.json())
             .then(data => {
                 setCurrentTaskList(data)
                 if (currentTask.id === selectedTask[0].id) {
                     // Create a new notes array with the updated note at noteIndex
                     const updatedNotes = [...currentTask.notes];
-                    updatedNotes[noteIndex] = note;
+                    updatedNotes[index] = note;
                     setCurrentTask({...currentTask, notes: updatedNotes})
                 }
             })
@@ -210,8 +228,63 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     }
 
     const updateChatNode = ( node : string ) => {
-        setChatProgression(prev => [...prev, chatNodes[node as keyof typeof chatNodes].chat_text])
-        setCurrentChatNode(chatNodes[node as keyof typeof chatNodes])
+        const nextChatNode = chatNodes[node as keyof typeof chatNodes]
+        setChatProgression(prev => [...prev, nextChatNode.chat_text])
+        setCurrentChatNode(nextChatNode)
+    }
+
+    const updateModifiedChatNode = ( node : string, freq : string ) => {
+        const nextChatNode = chatNodes[node as keyof typeof chatNodes]
+        const freqNum = freq[0]
+        let freqUnit = freq[freq.length - 1]
+        if (freqUnit == "y") {
+            freqUnit = "years"
+        } else if (freqUnit == "m") {
+            freqUnit = "months"
+        } else if (freqUnit == "d") {
+            freqUnit = "days"
+        }
+        nextChatNode.chat_text = nextChatNode.chat_text.replaceAll("insert_freq_num", freqNum)
+        nextChatNode.chat_text =nextChatNode.chat_text.replaceAll("insert_freq_unit", freqUnit)
+        setChatProgression(prev => [...prev, nextChatNode.chat_text])
+        setCurrentChatNode(nextChatNode)
+    }
+
+    const getTaskDetails = (task : string) => {
+        updateChatProgression(task)
+        const options = {method: "GET"}
+        fetch(`http://127.0.0.1:5000/get_task_details?task_name=${task}`, options)
+        .then(response => response.json())
+        .then(data => {
+            setCurrentTaskList(data)
+            setCurrentTask(data[data.length - 1])
+            updateModifiedChatNode(currentChatNode.next_node[0], data[data.length - 1].frequency)
+        })
+    }
+
+    const checkForOverwrite = (nodeId : number, optionIndex?: number, userInput?: string) => {
+        if (optionIndex) {
+            if (nodeId == 4) {
+                if (optionIndex == 1) {
+                    updateTaskReminder()
+                    updateTaskReminderEarly()
+                    console.log("=> update reminder and early reminder to false")
+                }
+            } else if (nodeId == 7) {
+                if (optionIndex == 1) {
+                    updateTaskReminderEarly()
+                    console.log("=> update early reminder to false")
+                }
+            }
+        } else if (userInput) {
+            if (nodeId == 5) {
+                updateTaskFrequency(userInput)
+                console.log("=> update frequency")
+            } else if (nodeId == 10) {
+                updateTaskNotes(userInput)
+                console.log("=> add custom note")
+            }
+        }
     }
 
     const taskContext = {
@@ -220,6 +293,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         upcomingTaskList: upcomingTaskList,
         currentChatNode: currentChatNode,
         chatDialog: chatProgression,
+        isListening: isListening,
         modalState: modalIsOpen,
         updateModalState,
         showTaskDetails,
@@ -230,6 +304,8 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         updateTaskNotes,
         updateChatProgression,
         updateChatNode,
+        getTaskDetails,
+        checkForOverwrite
     }
 
   return <TaskContext.Provider value={taskContext}>{children}</TaskContext.Provider>
