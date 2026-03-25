@@ -77,6 +77,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const [currentTask, setCurrentTask] = useState<TaskData>(defaultTask);
     const [currentTaskList, setCurrentTaskList] = useState<TaskData[]>(taskList)
     const [upcomingTaskList, setUpcomingTaskList] = useState<TaskData[]>(taskList)
+    const [taskListUpdate, setTaskListUpdate] = useState(0)
     const [chatProgression, setChatProgression] = useState([chatNodes[1].chat_text])
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const isListening = currentChatNode.next_node[0] === "4"
@@ -102,7 +103,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         .catch(e => {
             console.error(e)
         })
-    }, [currentTaskList])
+    }, [taskListUpdate])
 
     useEffect(() => {
         if (isListening) {
@@ -125,6 +126,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
             .then(response => response.json())
             .then(data => {
                 setCurrentTaskList(data)
+                setTaskListUpdate(taskListUpdate + 1)
             })
             .catch(e => {
                 console.error(e)
@@ -259,6 +261,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
             setCurrentTaskList(data)
             setCurrentTask(data[data.length - 1])
             updateModifiedChatNode(currentChatNode.next_node[0], data[data.length - 1].frequency)
+            setTaskListUpdate(taskListUpdate + 1)
         })
     }
 
