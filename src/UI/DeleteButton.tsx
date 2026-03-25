@@ -1,15 +1,10 @@
-import { useNavigate } from "react-router-dom";
-
 type deleteProps = {
     onClick: () => void
 }
 
 export default function DeleteButton( props : deleteProps ) {
-    const navigate = useNavigate();
-
     const handleClick = () => {
         props.onClick()
-        navigate('/dashboard')
     }
 
     return (

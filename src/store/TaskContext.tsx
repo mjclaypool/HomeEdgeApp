@@ -102,7 +102,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         .catch(e => {
             console.error(e)
         })
-    }, [])
+    }, [currentTaskList])
 
     useEffect(() => {
         if (isListening) {
