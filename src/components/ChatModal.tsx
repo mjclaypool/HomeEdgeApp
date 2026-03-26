@@ -11,8 +11,8 @@ export default function ChatModal() {
 
     return createPortal(
         <div className="fixed flex items-center justify-center top-0 left-0 h-[100vh] w-[100vw]">
-            <div className="w-[402px] h-[874px] rounded-[48px] bg-black opacity-90 z-1"/>
-            <div className="absolute w-[402px] h-[874px] font-roboto font-medium p-[24px]">
+            <div className="w-screen h-screen sm:w-[402px] sm:h-[874px] sm:rounded-[48px] bg-black opacity-90 z-1"/>
+            <div className="absolute w-full sm:w-[402px] h-[874px] font-roboto font-medium p-[24px]">
                 <dialog className="relative w-full h-full bg-transparent"
                     onClose={taskCtx?.updateModalState}
                     open>
