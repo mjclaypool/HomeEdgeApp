@@ -12,18 +12,39 @@ export default function ChatInputArea() {
         setInputText(event.target.value)
     }
 
-    const handleSelect = (index: number) => {
+    const handleSelect = async (index: number) => {
         const options = taskCtx?.currentChatNode.options;
         const nodeId = taskCtx?.currentChatNode.id;
         if (options) {
-            const optionsArray = Object.values(options);
-            taskCtx?.updateChatProgression(optionsArray[index])
-            if (nodeId) {
-                taskCtx?.checkForOverwrite(nodeId, index)
+            if (nodeId == 1 && index == 0 || nodeId == 11 && index == 0) {
+                const optionsArray = Object.values(options);
+                taskCtx?.updateChatProgression(optionsArray[index])
+                await taskCtx.getRecommendations()
+                setTimeout(() => {
+                    taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[index])
+                }, 1000)
+            } else {
+                const optionsArray = Object.values(options);
+                if (taskCtx.isListening) {
+                    if (index == 0 || index == 1 || index == 2) {
+                        taskCtx.getTaskDetails(optionsArray[index])
+                        taskCtx.removeRecListOption(index)
+                    } else if (index == 3) {
+                        taskCtx.refreshRecListOptions(taskCtx.currentChatNode.next_node[index], optionsArray[index])
+                    } else if (index == 4) {
+                        taskCtx?.updateChatProgression(optionsArray[index])
+                        setTimeout(() => {
+                            taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[index])
+                        }, 1000);
+                    }
+                } else if (nodeId) {
+                    taskCtx?.updateChatProgression(optionsArray[index])
+                    taskCtx?.checkForOverwrite(nodeId, index)
+                    setTimeout(() => {
+                        taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[index])
+                    }, 1000);
+                }
             }
-            setTimeout(() => {
-                taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[index])
-            }, 1000);
         }
     }
 
@@ -46,7 +67,7 @@ export default function ChatInputArea() {
         <div className="flex justify-between gap-[8px] w-full bg-cc-sec rounded-lg p-2">
             {taskCtx?.currentChatNode.resp_type == "multi"
             ?
-            <div className="flex flex-col gap-[8px] w-full">
+            <div className="flex flex-col w-full">
                 {Object.values(taskCtx.currentChatNode.options || {}).map((option, index) => (
                     <div key={index}>
                         <ChatOptionWrapper chatOption={option} onSelect={() => handleSelect(index)}/>

@@ -51,7 +51,10 @@ interface TaskContextType {
     updateTaskNotes: (note: string, noteIndex: number) => void,
     updateChatProgression: (res: string) => void,
     updateChatNode: (node: string) => void,
+    refreshRecListOptions: (node: string, option: string) => void,
+    removeRecListOption: (index: number) => void,
     getTaskDetails: (task: string) => void,
+    getRecommendations: () => Promise<void>,
     checkForOverwrite: (nodeId: number, optionIndex?: number, userInput?: string) => void
 }
 
@@ -80,7 +83,9 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const [taskListUpdate, setTaskListUpdate] = useState(0)
     const [chatProgression, setChatProgression] = useState([chatNodes[1].chat_text])
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [recTasksList, setRecTasksList] = useState<string[]>([])
     const isListening = currentChatNode.next_node[0] === "4"
+    // let recTasks: string[] = []
 
     useEffect(() => {
         const today = new Date();
@@ -265,8 +270,70 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         })
     }
 
+    const updateChatNodeOptions = ( optionsList : string[] ) => {
+        setTimeout(() => {
+            if (currentChatNode.id == 1) {
+                const nextChatNode = chatNodes[currentChatNode.next_node[0] as keyof typeof chatNodes]
+                if (nextChatNode.options) {
+                    nextChatNode.options[0] = optionsList[0]
+                    nextChatNode.options[1] = optionsList[1]
+                    if ('2' in nextChatNode.options) {
+                        nextChatNode.options[2] = optionsList[2]
+                    }
+                }
+            } else if (currentChatNode.id == 2) {
+                const nextChatNode = chatNodes[currentChatNode.next_node[3] as keyof typeof chatNodes]
+                // console.log(nextChatNode.options)
+                if (nextChatNode.options) {
+                    nextChatNode.options[0] = optionsList[0]
+                    nextChatNode.options[1] = optionsList[1]
+                    if ('2' in nextChatNode.options) {
+                        nextChatNode.options[2] = optionsList[2]
+                    }
+                }
+            }
+        }, 1000)
+    }
+
+    const refreshRecListOptions = (node: string, option : string) => {
+        const nextChatNode = chatNodes[node as keyof typeof chatNodes]
+        updateChatProgression(option)
+        setRecTasksList(recTasksList.slice(3))
+        updateChatNodeOptions(recTasksList.slice(3))
+        setTimeout(() => {
+            setChatProgression(prev => [...prev, nextChatNode.chat_text])
+            setCurrentChatNode(nextChatNode)
+        }, 1000)
+    }
+
+    const removeRecListOption = ( index : number ) => {
+        recTasksList.splice(index, 1)
+        setRecTasksList(recTasksList)
+        updateChatNodeOptions(recTasksList)
+    }
+
+    const getRecommendations = async () => {
+        if (recTasksList.length < 1) {
+            const options = {method: "GET"}
+            await fetch(`http://127.0.0.1:5000/get_recommendations`, options)
+            .then(response => response.json())
+            .then(data => {
+                // const recRefs = data["tasks"]["references"]
+                const recTasks = data["tasks"]["task_list"]
+                setRecTasksList(recTasks)
+                if (recTasks.length > 2) {
+                    updateChatNodeOptions(recTasks.slice(0, 3))
+                } else {
+                    console.log("Not enough recs in list")
+                }
+            })
+        }
+        // setRecTasksList(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+        // updateChatNodeOptions(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+    }
+
     const checkForOverwrite = (nodeId : number, optionIndex?: number, userInput?: string) => {
-        if (optionIndex) {
+        if (optionIndex || optionIndex == 0) {
             if (nodeId == 4) {
                 if (optionIndex == 1) {
                     updateTaskReminder()
@@ -307,7 +374,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         updateTaskNotes,
         updateChatProgression,
         updateChatNode,
+        refreshRecListOptions,
+        removeRecListOption,
         getTaskDetails,
+        getRecommendations,
         checkForOverwrite
     }
 
