@@ -29,7 +29,6 @@ export default function ChatInputArea() {
                 const optionsArray = Object.values(options);
                 if (taskCtx.isListening) {
                     if (index == 0 || index == 1 || index == 2) {
-                        taskCtx.updateThinking(true) // set thinking to true
                         taskCtx.getTaskDetails(optionsArray[index])
                         taskCtx.removeRecListOption(index)
                     } else if (index == 3) {
@@ -37,7 +36,6 @@ export default function ChatInputArea() {
                     } else if (index == 4) {
                         taskCtx?.updateChatProgression(optionsArray[index])
                         setTimeout(() => {
-                            taskCtx.updateThinking(false) // set thinking to false
                             taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[index])
                         }, 1000);
                     }
@@ -54,7 +52,7 @@ export default function ChatInputArea() {
 
     const handleUserInput = () => {
         if (taskCtx?.isListening) {
-            taskCtx?.getTaskDetails(inputText)
+            taskCtx.getTaskDetails(inputText)
         } else {
             const nodeId = taskCtx?.currentChatNode.id;
             taskCtx?.updateChatProgression(inputText)

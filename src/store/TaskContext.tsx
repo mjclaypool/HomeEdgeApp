@@ -260,22 +260,9 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         setCurrentChatNode(nextChatNode)
     }
 
-    const getTaskDetails = (task : string) => {
-        updateChatProgression(task)
-        const options = {method: "GET"}
-        fetch(`http://127.0.0.1:5000/get_task_details?task_name=${task}`, options)
-        .then(response => response.json())
-        .then(data => {
-            setCurrentTaskList(data)
-            setCurrentTask(data[data.length - 1])
-            updateModifiedChatNode(currentChatNode.next_node[0], data[data.length - 1].frequency)
-            setTaskListUpdate(taskListUpdate + 1)
-        })
-    }
-
     const updateChatNodeOptions = ( optionsList : string[] ) => {
         setTimeout(() => {
-            if (currentChatNode.id == 1) {
+            if (currentChatNode.id == 1 || currentChatNode.id == 11) {
                 const nextChatNode = chatNodes[currentChatNode.next_node[0] as keyof typeof chatNodes]
                 if (nextChatNode.options) {
                     nextChatNode.options[0] = optionsList[0]
@@ -333,6 +320,21 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
         // setRecTasksList(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
         // updateChatNodeOptions(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+    }
+
+    const getTaskDetails = (task : string) => {
+        updateChatProgression(task)
+        setIsThinking(true)
+        const options = {method: "GET"}
+        fetch(`http://127.0.0.1:5000/get_task_details?task_name=${task}`, options)
+        .then(response => response.json())
+        .then(data => {
+            setCurrentTaskList(data)
+            setCurrentTask(data[data.length - 1])
+            setIsThinking(false)
+            updateModifiedChatNode(currentChatNode.next_node[0], data[data.length - 1].frequency)
+            setTaskListUpdate(taskListUpdate + 1)
+        })
     }
 
     const checkForOverwrite = (nodeId : number, optionIndex?: number, userInput?: string) => {
