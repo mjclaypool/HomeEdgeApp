@@ -20,6 +20,7 @@ export default function ChatDialog() {
                     {index % 2 == 0 ? <ChatOutputWrapper chatOutput={msg} /> : <ChatInputWrapper userInput={msg} />}
                 </div>
             ))}
+            {taskCtx?.isThinking && <ChatOutputWrapper chatOutput="..." />}
             <div ref={bottomRef}></div>
         </div>
     )

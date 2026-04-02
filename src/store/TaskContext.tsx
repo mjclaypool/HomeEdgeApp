@@ -42,6 +42,7 @@ interface TaskContextType {
     chatDialog: string[],
     isListening: boolean,
     modalState: boolean,
+    isThinking: boolean,
     updateModalState: () => void,
     showTaskDetails: (task: string) => void,
     deleteTaskDetails: (task: string) => void,
@@ -55,7 +56,8 @@ interface TaskContextType {
     removeRecListOption: (index: number) => void,
     getTaskDetails: (task: string) => void,
     getRecommendations: () => Promise<void>,
-    checkForOverwrite: (nodeId: number, optionIndex?: number, userInput?: string) => void
+    checkForOverwrite: (nodeId: number, optionIndex?: number, userInput?: string) => void,
+    updateThinking: (value: boolean) => void
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined)
@@ -84,6 +86,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const [chatProgression, setChatProgression] = useState([chatNodes[1].chat_text])
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [recTasksList, setRecTasksList] = useState<string[]>([])
+    const [isThinking, setIsThinking] = useState(false)
     const isListening = currentChatNode.next_node[0] === "4"
     // let recTasks: string[] = []
 
@@ -357,6 +360,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         }
     }
 
+    const updateThinking = ( value: boolean ) => {
+        setIsThinking(value)
+    }
+
     const taskContext = {
         task: currentTask,
         taskList: currentTaskList,
@@ -365,6 +372,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         chatDialog: chatProgression,
         isListening: isListening,
         modalState: modalIsOpen,
+        isThinking: isThinking,
         updateModalState,
         showTaskDetails,
         deleteTaskDetails,
@@ -378,7 +386,8 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         removeRecListOption,
         getTaskDetails,
         getRecommendations,
-        checkForOverwrite
+        checkForOverwrite,
+        updateThinking
     }
 
   return <TaskContext.Provider value={taskContext}>{children}</TaskContext.Provider>
