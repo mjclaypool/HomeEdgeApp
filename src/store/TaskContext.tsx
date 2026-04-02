@@ -94,6 +94,11 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     // let recTasks: string[] = []
 
     useEffect(() => {
+        const options = {method: 'POST'}
+        fetch('http://127.0.0.1:5000/clear_tasks', options)
+    }, [])
+
+    useEffect(() => {
         const today = new Date();
         const upcomingDate = add(today, { days: 30 })
         const options = {method: 'GET'}
