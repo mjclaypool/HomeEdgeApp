@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, Navigate } from "react-router-dom"
 
 import Header from "../components/Header"
 import TaskHeading from "../components/TaskHeading"
@@ -36,6 +36,10 @@ export default function TaskPage() {
 
     const handleCloseWindow = () => {
         setDialogOpen(false)
+    }
+
+    if (!taskCtx?.isAuth) {
+        return <Navigate to="/" replace={true} />
     }
 
     return (

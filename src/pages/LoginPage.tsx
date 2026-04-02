@@ -1,8 +1,11 @@
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { useNavigate } from "react-router-dom";
+
+import TaskContext from "../store/TaskContext";
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const taskCtx = useContext(TaskContext)
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [usernameError, setUsernameError] = useState(false);
@@ -28,6 +31,7 @@ export default function LoginPage() {
 
     const handleClick = () => {
         if (username == defaultUsername && password == defaultPassword) {
+            taskCtx?.updateAuth()
             navigate('/dashboard')
         } else if (username != defaultUsername && password != defaultPassword) {
             setUsernameError(true)

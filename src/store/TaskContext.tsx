@@ -43,6 +43,8 @@ interface TaskContextType {
     isListening: boolean,
     modalState: boolean,
     isThinking: boolean,
+    isAuth: boolean,
+    updateAuth: () => void,
     updateModalState: () => void,
     showTaskDetails: (task: string) => void,
     deleteTaskDetails: (task: string) => void,
@@ -87,6 +89,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [recTasksList, setRecTasksList] = useState<string[]>([])
     const [isThinking, setIsThinking] = useState(false)
+    const [isAuth, setIsAuth] = useState(false)
     const isListening = currentChatNode.next_node[0] === "4"
     // let recTasks: string[] = []
 
@@ -366,6 +369,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         setIsThinking(value)
     }
 
+    const updateAuth = () => {
+        setIsAuth(true)
+    }
+
     const taskContext = {
         task: currentTask,
         taskList: currentTaskList,
@@ -375,6 +382,8 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         isListening: isListening,
         modalState: modalIsOpen,
         isThinking: isThinking,
+        isAuth: isAuth,
+        updateAuth,
         updateModalState,
         showTaskDetails,
         deleteTaskDetails,
