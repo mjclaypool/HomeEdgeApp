@@ -44,6 +44,7 @@ interface TaskContextType {
     modalState: boolean,
     isThinking: boolean,
     isAuth: boolean,
+    credentials: string,
     updateAuth: () => void,
     updateModalState: () => void,
     showTaskDetails: (task: string) => void,
@@ -59,7 +60,8 @@ interface TaskContextType {
     getTaskDetails: (task: string) => void,
     getRecommendations: () => Promise<void>,
     checkForOverwrite: (nodeId: number, optionIndex?: number, userInput?: string) => void,
-    updateThinking: (value: boolean) => void
+    updateThinking: (value: boolean) => void,
+    updateCredentials: (username: string, password: string) => void
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined)
@@ -91,18 +93,20 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const [isThinking, setIsThinking] = useState(false)
     const [isAuth, setIsAuth] = useState(false)
     const isListening = currentChatNode.next_node[0] === "4"
+    const [credentials, setCredentials] = useState<string>("")
     // let recTasks: string[] = []
 
     useEffect(() => {
-        const options = {method: 'POST'}
-        fetch('http://127.0.0.1:5000/clear_tasks', options)
+        const options = {
+            method: 'POST'}
+        fetch('https://home-edge-backend.vercel.app/clear_tasks', options)
     }, [])
 
     useEffect(() => {
         const today = new Date();
         const upcomingDate = add(today, { days: 30 })
         const options = {method: 'GET'}
-        fetch('http://127.0.0.1:5000/task_list', options)
+        fetch('https://home-edge-backend.vercel.app/task_list', options)
         .then(response => response.json())
         .then(data => {
             setCurrentTaskList(data)
@@ -135,10 +139,12 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     }
 
     const deleteTaskDetails = (taskURL: string) => {
-        const options = {method: 'DELETE'}
+        const options = {method: 'DELETE', headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
         const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
-            fetch(`http://127.0.0.1:5000/delete_task?task_id=${selectedTask[0].id}`, options)
+            fetch(`https://home-edge-backend.vercel.app/delete_task?task_id=${selectedTask[0].id}`, options)
             .then(response => response.json())
             .then(data => {
                 setCurrentTaskList(data)
@@ -152,11 +158,13 @@ export function TaskContextProvider({children} : PropsWithChildren) {
 
     // const updateTaskFrequency = (taskURL: string, newFrequencyValue: string) => {
     const updateTaskFrequency = (newFrequencyValue: string) => {
-        const options = {method: 'POST'}
+        const options = {method: 'POST', headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
         // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
         const selectedTask = [currentTask];
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
-            fetch(`http://127.0.0.1:5000/update_task_freq?task_id=${selectedTask[0].id}&task_freq=${newFrequencyValue}`, options)
+            fetch(`https://home-edge-backend.vercel.app/update_task_freq?task_id=${selectedTask[0].id}&task_freq=${newFrequencyValue}`, options)
             .then(response => response.json())
             .then(data => {
                 setCurrentTaskList(data)
@@ -171,12 +179,14 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     }
 
     const updateTaskReminder = () => {
-        const options = {method: 'POST'}
+        const options = {method: 'POST', headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
         // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
         const selectedTask = [currentTask];
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
             const newReminderValue = !selectedTask[0].reminder;
-            fetch(`http://127.0.0.1:5000/update_task_reminder?task_id=${selectedTask[0].id}&task_reminder=${newReminderValue}`, options)
+            fetch(`https://home-edge-backend.vercel.app/update_task_reminder?task_id=${selectedTask[0].id}&task_reminder=${newReminderValue}`, options)
             .then(response => response.json())
             .then(data => {
                 setCurrentTaskList(data)
@@ -191,12 +201,14 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     }
 
     const updateTaskReminderEarly = () => {
-        const options = {method: 'POST'}
+        const options = {method: 'POST', headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
         // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
         const selectedTask = [currentTask];
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
             const newReminderEarlyValue = !selectedTask[0].reminderEarly;
-            fetch(`http://127.0.0.1:5000/update_task_reminder_early?task_id=${selectedTask[0].id}&task_reminder_early=${newReminderEarlyValue}`, options)
+            fetch(`https://home-edge-backend.vercel.app/update_task_reminder_early?task_id=${selectedTask[0].id}&task_reminder_early=${newReminderEarlyValue}`, options)
             .then(response => response.json())
             .then(data => {
                 setCurrentTaskList(data)
@@ -211,12 +223,14 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     }
 
     const updateTaskNotes = (note: string, noteIndex?: number) => {
-        const options = {method: 'POST'}
+        const options = {method: 'POST', headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
         // const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
         const selectedTask = [currentTask];
         const index = noteIndex ?? 0
         if (selectedTask.length > 0 && selectedTask[0].id && selectedTask[0].id.length > 0) {
-            fetch(`http://127.0.0.1:5000/update_task_notes?task_id=${selectedTask[0].id}&task_note=${note}&task_note_index=${index}`, options)
+            fetch(`https://home-edge-backend.vercel.app/update_task_notes?task_id=${selectedTask[0].id}&task_note=${note}&task_note_index=${index}`, options)
             .then(response => response.json())
             .then(data => {
                 setCurrentTaskList(data)
@@ -312,8 +326,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
 
     const getRecommendations = async () => {
         if (recTasksList.length < 1) {
-            const options = {method: "GET"}
-            await fetch(`http://127.0.0.1:5000/get_recommendations`, options)
+            const options = {method: "GET", headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
+            await fetch(`https://home-edge-backend.vercel.app/get_recommendations`, options)
             .then(response => response.json())
             .then(data => {
                 // const recRefs = data["tasks"]["references"]
@@ -333,8 +349,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
     const getTaskDetails = (task : string) => {
         updateChatProgression(task)
         setIsThinking(true)
-        const options = {method: "GET"}
-        fetch(`http://127.0.0.1:5000/get_task_details?task_name=${task}`, options)
+        const options = {method: "GET", headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
+        fetch(`https://home-edge-backend.vercel.app/get_task_details?task_name=${task}`, options)
         .then(response => response.json())
         .then(data => {
             setCurrentTaskList(data)
@@ -378,6 +396,10 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         setIsAuth(true)
     }
 
+    const updateCredentials = ( username: string, password: string ) => {
+        setCredentials(btoa(`${username}:${password}`))
+    }
+
     const taskContext = {
         task: currentTask,
         taskList: currentTaskList,
@@ -388,6 +410,7 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         modalState: modalIsOpen,
         isThinking: isThinking,
         isAuth: isAuth,
+        credentials: credentials,
         updateAuth,
         updateModalState,
         showTaskDetails,
@@ -403,7 +426,8 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         getTaskDetails,
         getRecommendations,
         checkForOverwrite,
-        updateThinking
+        updateThinking,
+        updateCredentials
     }
 
   return <TaskContext.Provider value={taskContext}>{children}</TaskContext.Provider>

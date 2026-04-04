@@ -10,8 +10,6 @@ export default function LoginPage() {
     const [password, setPassword] = useState('');
     const [usernameError, setUsernameError] = useState(false);
     const [passwordError, setPasswordError] = useState(false);
-    const defaultUsername = "username";
-    const defaultPassword = "password";
 
     const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(event.target.value)
@@ -30,17 +28,22 @@ export default function LoginPage() {
     }
 
     const handleClick = () => {
-        if (username == defaultUsername && password == defaultPassword) {
-            taskCtx?.updateAuth()
-            navigate('/dashboard')
-        } else if (username != defaultUsername && password != defaultPassword) {
-            setUsernameError(true)
-            setPasswordError(true)
-        } else if (username != defaultUsername) {
-            setUsernameError(true)
-        } else if (password != defaultPassword) {
-            setPasswordError(true)
-        }
+        taskCtx?.updateCredentials(username, password)
+        const credentials = btoa(`${username}:${password}`)
+        const options = {
+            method: 'GET',
+            headers: {
+                'Authorization': `Basic ${credentials}`
+            }}
+        fetch('https://home-edge-backend.vercel.app/auth', options)
+        .then(response => {
+            if (response.ok) {
+                taskCtx?.updateAuth()
+                navigate('/dashboard')
+            } else {
+                setPasswordError(true)
+            }
+        })
     }
 
     return (
