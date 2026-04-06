@@ -51,13 +51,15 @@ export default function ChatInputArea() {
     }
 
     const handleUserInput = () => {
+        const userInput = inputText
+        setInputText("")
         if (taskCtx?.isListening) {
-            taskCtx.getTaskDetails(inputText)
+            taskCtx.getTaskDetails(userInput)
         } else {
             const nodeId = taskCtx?.currentChatNode.id;
-            taskCtx?.updateChatProgression(inputText)
+            taskCtx?.updateChatProgression(userInput)
             if (nodeId) {
-                taskCtx?.checkForOverwrite(nodeId, undefined, inputText)
+                taskCtx?.checkForOverwrite(nodeId, undefined, userInput)
             }
             setTimeout(() => {
                 taskCtx?.updateChatNode(taskCtx.currentChatNode.next_node[0])
@@ -80,7 +82,7 @@ export default function ChatInputArea() {
             <div className="flex justify-between gap-[8px] w-full">
                 <input className="flex-1 h-[40px] bg-cc-offw rounded-lg text-[14px] text-cc-prim p-3"
                     type="text"
-                    id="username-input"
+                    id="text-input"
                     value={inputText}
                     onChange={handleInputChange}
                     placeholder="Enter text"
