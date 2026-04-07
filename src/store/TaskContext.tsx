@@ -125,11 +125,11 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         })
     }, [taskListUpdate])
 
-    useEffect(() => {
-        if (isListening) {
-            console.log("Listening")
-        }
-    }, [isListening])
+    // useEffect(() => {
+    //     if (isListening) {
+    //         console.log("Listening")
+    //     }
+    // }, [isListening])
 
     const showTaskDetails = (taskURL: string) => {
         const selectedTask = currentTaskList.filter((task) => task.id == taskURL);
@@ -276,9 +276,9 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         } else if (freqUnit == "d") {
             freqUnit = "days"
         }
-        nextChatNode.chat_text = nextChatNode.chat_text.replaceAll("insert_freq_num", freqNum)
-        nextChatNode.chat_text =nextChatNode.chat_text.replaceAll("insert_freq_unit", freqUnit)
-        setChatProgression(prev => [...prev, nextChatNode.chat_text])
+        let next_text = nextChatNode.chat_text.replaceAll("insert_freq_num", freqNum)
+        next_text = next_text.replaceAll("insert_freq_unit", freqUnit)
+        setChatProgression(prev => [...prev, next_text])
         setCurrentChatNode(nextChatNode)
     }
 
@@ -355,10 +355,11 @@ export function TaskContextProvider({children} : PropsWithChildren) {
         fetch(`https://home-edge-backend.vercel.app/get_task_details?task_name=${task}`, options)
         .then(response => response.json())
         .then(data => {
+            const taskFreq = data[data.length - 1].frequency
             setCurrentTaskList(data)
             setCurrentTask(data[data.length - 1])
             setIsThinking(false)
-            updateModifiedChatNode(currentChatNode.next_node[0], data[data.length - 1].frequency)
+            updateModifiedChatNode(currentChatNode.next_node[0], taskFreq)
             setTaskListUpdate(taskListUpdate + 1)
         })
     }
@@ -368,22 +369,24 @@ export function TaskContextProvider({children} : PropsWithChildren) {
             if (nodeId == 4) {
                 if (optionIndex == 1) {
                     updateTaskReminder()
-                    updateTaskReminderEarly()
-                    console.log("=> update reminder and early reminder to false")
+                    setTimeout(() => {
+                        updateTaskReminderEarly()
+                    }, 500)
+                    // console.log("=> update reminder and early reminder to false")
                 }
             } else if (nodeId == 7) {
                 if (optionIndex == 1) {
                     updateTaskReminderEarly()
-                    console.log("=> update early reminder to false")
+                    // console.log("=> update early reminder to false")
                 }
             }
         } else if (userInput) {
             if (nodeId == 5) {
                 updateTaskFrequency(userInput)
-                console.log("=> update frequency")
+                // console.log("=> update frequency")
             } else if (nodeId == 10) {
                 updateTaskNotes(userInput)
-                console.log("=> add custom note")
+                // console.log("=> add custom note")
             }
         }
     }
